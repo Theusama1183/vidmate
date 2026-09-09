@@ -1,0 +1,11 @@
+Assalam o Alaikum! Aaj hum seekhenge Python ki basics.
+
+Sab se pehle variables. Name mein string hai Ahmed, age mein number 25. Height decimal 5.9, aur is_student boolean True.
+
+Ab type function se data types check karte hain. Dekho: name string hai, age integer, height float.
+
+Ab operations. Numbers pe arithmetic; age mein 5 joro, result 30. Strings ko plus se joro; Hello Ahmed.
+
+F-strings se variables ko sentence mein dalo. Len string ki lambai batata hai.
+
+Practice karte raho, agle video mein functions seekhenge. Allah Hafiz!

@@ -1,0 +1,41 @@
+{
+  "segments": [
+    {
+      "name": "s1_intro",
+      "start_ms": 166,
+      "end_ms": 4366,
+      "text": "Assalam o Alaikum! Aaj hum seekhenge Python ki basics."
+    },
+    {
+      "name": "s2_variables",
+      "start_ms": 4333,
+      "end_ms": 16069,
+      "text": "Sab se pehle variables. Name mein string hai Ahmed, age mein number 25. Height decimal 5.9, aur is_student boolean True."
+    },
+    {
+      "name": "s3_datatypes",
+      "start_ms": 15666,
+      "end_ms": 24162,
+      "text": "Ab type function se data types check karte hain. Dekho: name string hai, age integer, height float."
+    },
+    {
+      "name": "s4_operations",
+      "start_ms": 29666,
+      "end_ms": 40178,
+      "text": "Ab operations. Numbers pe arithmetic; age mein 5 joro, result 30. Strings ko plus se joro; Hello Ahmed."
+    },
+    {
+      "name": "s5_fstrings",
+      "start_ms": 44500,
+      "end_ms": 50812,
+      "text": "F-strings se variables ko sentence mein dalo. Len string ki lambai batata hai."
+    },
+    {
+      "name": "s6_outro",
+      "start_ms": 54166,
+      "end_ms": 59830,
+      "text": "Practice karte raho, agle video mein functions seekhenge. Allah Hafiz!"
+    }
+  ],
+  "total_ms": 62040.0
+}

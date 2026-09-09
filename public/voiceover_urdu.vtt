@@ -1,0 +1,39 @@
+1
+00:00:00,166 --> 00:00:04,366
+Assalam o Alaikum! Aaj hum seekhenge Python ki basics.
+
+2
+00:00:04,333 --> 00:00:10,666
+Sab se pehle variables. Name mein string hai Ahmed, age mein number 25.
+
+3
+00:00:10,666 --> 00:00:16,069
+Height decimal 5.9, aur is_student boolean True.
+
+4
+00:00:15,666 --> 00:00:19,666
+Ab type function se data types check karte hain.
+
+5
+00:00:19,666 --> 00:00:24,162
+Dekho: name string hai, age integer, height float.
+
+6
+00:00:29,666 --> 00:00:35,500
+Ab operations. Numbers pe arithmetic; age mein 5 joro, result 30.
+
+7
+00:00:35,500 --> 00:00:40,178
+Strings ko plus se joro; Hello Ahmed.
+
+8
+00:00:44,500 --> 00:00:48,166
+F-strings se variables ko sentence mein dalo.
+
+9
+00:00:48,166 --> 00:00:50,812
+Len string ki lambai batata hai.
+
+10
+00:00:54,166 --> 00:00:59,830
+Practice karte raho, agle video mein functions seekhenge. Allah Hafiz!
