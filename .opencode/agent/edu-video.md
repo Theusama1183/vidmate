@@ -50,6 +50,15 @@ fix -> "why" -> challenge.
 
 - **Code FIRST:** show real Python code typing in a live editor, not slides. The
   viewer must be able to copy-paste and run it.
+- **Code editor is FULL SCREEN.** Use `CodeEditor` with `useVideoConfig`-driven
+  sizing (no hardcoded 1080px heights, no terminal strip stealing editor space).
+  Terminal output, if shown, is a small floating overlay at bottom-right — it must
+  never shrink the editor.
+- **Real typing vibe.** The cursor is a solid VS Code-style block that advances
+  character-by-character at a human pace (speed ~4 frames/char). After each line
+  finishes, the cursor stays put where typing stopped and blinks naturally —
+  it does not jump to the left margin. Match `ALL_LINES` timing so each concept
+  lands exactly when narration says it.
 - **Whiteboard visualisation:** use pen/SVG path-draw animations for concepts
   (arrays, loops, recursion trees). Use @remotion paths' `evolvePath`.
 - **Narration language:** Urdu by default (voiceover file in `public/voiceover.mp3`,
@@ -59,6 +68,12 @@ fix -> "why" -> challenge.
 - **No "AI channel" branding.** No "in this AI-generated video" talk. All narration
   must be from a human teacher's perspective. No mention of VidoAutomate, opencode,
   or any AI tooling in the video itself.
+- **Human tone, not AI tone.** Write narration the way a real teacher talks off the
+  cuff: short conversational sentences, Urdu-English mix like normal speech, direct
+  address ("aap", "hum", "dekho", "yaad rakho"), no robotic bullet lists in the VO,
+  no "in this lesson we will learn X, Y, and Z" filler. Concepts explained with
+  everyday analogies. Scripted words must read naturally aloud — read each line
+  out loud mentally before keeping it.
 
 ## 4. How to build a video in this project
 
@@ -74,6 +89,11 @@ is `src/index.ts` -> `src/Root.tsx`, which registers compositions.
 - Subtitle overlay component pattern: `src/components/SubtitleOverlay.tsx`.
 - Shared styling tokens: `src/components/Shared.tsx` (COLORS, FadeIn, SlideUp, ...).
 - Tailwind v4 is wired via `remotion.config.ts`, global import in `src/index.css`.
+- **CodeEditor contract:** `src/components/CodeEditor.tsx` renders a full-screen
+  VS Code-style editor. It accepts `lines: CodeLine[]` (text/pause/hold/speed/
+  indent), `visibleLineCount`, `terminalLines`, `terminalLineCount`,
+  `terminalVisible`, `highlightLine`. It auto-fits font + line-height to the
+  composition height and clips nothing. Reuse it; do not build a parallel editor.
 
 ### Voiceover / audio generation
 

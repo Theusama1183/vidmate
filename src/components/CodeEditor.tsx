@@ -1,5 +1,5 @@
 import React from "react";
-import { useCurrentFrame } from "remotion";
+import { useCurrentFrame, useVideoConfig } from "remotion";
 
 const THEME = {
   bg: "#1E1E1E",
@@ -45,6 +45,7 @@ interface CodeEditorProps {
   fontSize?: number;
   showLineNumbers?: boolean;
   highlightLine?: number;
+  horizontalPadding?: number;
 }
 
 const KEYWORDS = new Set([
@@ -117,8 +118,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   fontSize = 28,
   showLineNumbers = true,
   highlightLine,
+  horizontalPadding = 20,
 }) => {
   const frame = useCurrentFrame();
+  const { height } = useVideoConfig();
   const visCount = visibleLineCount ?? lines.length;
 
   // Build absolute timing for ALL lines
@@ -163,8 +166,16 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   // Terminal typing animation
   const termVisibleCount = terminalLineCount ?? (terminalVisible ? terminalLines.length : 0);
 
-  // Height of editor vs terminal
-  const termHeight = terminalVisible ? Math.min(termVisibleCount * 38 + 52, 280) : 0;
+  // ─── Responsive layout ────────────────────────────────
+  // Fixed chrome: title bar (42) + status bar (30). Editor gets everything else.
+  const titleBarH = 42;
+  const statusH = 30;
+  const editorH = Math.max(200, height - titleBarH - statusH);
+
+  // Line height auto-fits so all visible lines are on screen (no cropping).
+  const gutterW = showLineNumbers ? 60 : 0;
+  const lineHeight = Math.max(30, Math.min(46, Math.floor(editorH / Math.max(1, visCount))));
+  const effFontSize = Math.min(fontSize, Math.floor(lineHeight * 0.82));
 
   return (
     <div
@@ -181,7 +192,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       {/* ─── Title Bar ─────────────────────────────── */}
       <div
         style={{
-          height: 42,
+          height: titleBarH,
           display: "flex",
           alignItems: "center",
           padding: "0 16px",
@@ -200,13 +211,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         <span style={{ color: "#6D6D6D", fontSize: 12 }}>{language}</span>
       </div>
 
-      {/* ─── Editor Area ───────────────────────────── */}
-      <div style={{ flex: 1, display: "flex", overflow: "hidden", height: 1080 - 42 - 30 }}>
+      {/* ─── Editor Area (fills all remaining space) ── */}
+      <div style={{ flex: 1, display: "flex", overflow: "hidden", height: editorH, position: "relative" }}>
         {/* Gutter */}
         {showLineNumbers && (
           <div
             style={{
-              width: 60,
+              width: gutterW,
               flexShrink: 0,
               backgroundColor: THEME.sidebarBg,
               borderRight: `1px solid ${THEME.gutterBorder}`,
@@ -217,13 +228,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               <div
                 key={i}
                 style={{
-                  height: 40,
+                  height: lineHeight,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "flex-end",
                   paddingRight: 12,
                   color: i === cursorLine ? THEME.lineNumberActive : THEME.lineNumber,
-                  fontSize: fontSize * 0.55,
+                  fontSize: effFontSize * 0.55,
                   fontFamily: "inherit",
                 }}
               >
@@ -234,7 +245,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         )}
 
         {/* Code body */}
-        <div style={{ flex: 1, padding: "12px 20px", position: "relative" }}>
+        <div style={{ flex: 1, padding: `12px ${horizontalPadding}px`, position: "relative" }}>
           {lines.slice(0, visCount).map((line, li) => {
             const isCurrentlyTyping = li === activeLine;
             const typedLen = isCurrentlyTyping
@@ -249,7 +260,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               <div
                 key={li}
                 style={{
-                  height: 40,
+                  height: lineHeight,
                   display: "flex",
                   alignItems: "center",
                   marginLeft: -12,
@@ -262,7 +273,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                   borderLeft: isHL ? "3px solid #3B82F6" : "3px solid transparent",
                 }}
               >
-                <div style={{ whiteSpace: "pre", fontSize, lineHeight: 1.15, color: THEME.default }}>
+                <div style={{ whiteSpace: "pre", fontSize: effFontSize, lineHeight: 1.15, color: THEME.default }}>
                   {indentStr}
                   {tokenize(visibleText).map((t, ti) => (
                     <span key={ti} style={{ color: t.color }}>{t.text}</span>
@@ -271,12 +282,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                     <span
                       style={{
                         display: "inline-block",
-                        width: 12,
-                        height: fontSize * 0.88,
+                        width: Math.max(5, effFontSize * 0.62),
+                        height: effFontSize * 0.88,
                         backgroundColor: THEME.cursor,
-                        opacity: 0.8,
+                        opacity: 0.9,
                         marginLeft: 1,
                         verticalAlign: "middle",
+                        boxShadow: "0 0 0 rgba(0,0,0,0)",
                       }}
                     />
                   )}
@@ -285,59 +297,62 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             );
           })}
         </div>
-      </div>
 
-      {/* ─── Terminal Panel ────────────────────────── */}
-      {terminalVisible && (
-        <div
-          style={{
-            height: termHeight,
-            backgroundColor: "#0C0C0C",
-            borderTop: "1px solid #333",
-            flexShrink: 0,
-            overflow: "hidden",
-          }}
-        >
-          {/* Terminal tabs */}
+        {/* ─── Floating Terminal (overlay — never steals editor space) ── */}
+        {terminalVisible && termVisibleCount > 0 && (
           <div
             style={{
-              height: 36,
-              display: "flex",
-              alignItems: "center",
-              padding: "0 16px",
-              backgroundColor: "#1F1F1F",
-              borderBottom: "1px solid #333",
-              gap: 20,
+              position: "absolute",
+              right: 16,
+              bottom: 16,
+              width: 520,
+              maxWidth: "60%",
+              backgroundColor: "rgba(12,12,12,0.94)",
+              borderRadius: 8,
+              border: "1px solid #333",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.55)",
+              overflow: "hidden",
+              zIndex: 60,
             }}
           >
-            <span style={{ color: "#999", fontSize: 12, borderBottom: "1px solid #007ACC", paddingBottom: 6 }}>
-              PROBLEMS
-            </span>
-            <span style={{ color: "#999", fontSize: 12, paddingBottom: 6 }}>OUTPUT</span>
-            <span style={{ color: "#FFFFFF", fontSize: 12, fontWeight: 600, paddingBottom: 6, borderBottom: "1px solid #007ACC" }}>
-              TERMINAL
-            </span>
-            <span style={{ color: "#999", fontSize: 12, paddingBottom: 6 }}>PORT</span>
-          </div>
+            {/* Terminal tabs */}
+            <div
+              style={{
+                height: 34,
+                display: "flex",
+                alignItems: "center",
+                padding: "0 14px",
+                backgroundColor: "#1F1F1F",
+                borderBottom: "1px solid #333",
+                gap: 16,
+              }}
+            >
+              <span style={{ color: "#FFFFFF", fontSize: 12, fontWeight: 600, paddingBottom: 5, borderBottom: "1px solid #007ACC", display: "block" }}>
+                TERMINAL
+              </span>
+              <span style={{ color: "#999", fontSize: 12, paddingBottom: 5 }}>OUTPUT</span>
+              <span style={{ color: "#999", fontSize: 12, paddingBottom: 5 }}>PROBLEMS</span>
+            </div>
 
-          {/* Terminal content */}
-          <div style={{ padding: "12px 20px", fontFamily: "Consolas, monospace", fontSize: 17 }}>
-            {terminalLines.slice(0, termVisibleCount).map((tl, i) => (
-              <div key={i} style={{ height: 34, display: "flex", alignItems: "center", lineHeight: 1.2 }}>
-                {tl.prompt && (
-                  <span style={{ color: "#6A9955", marginRight: 6 }}>&gt;</span>
-                )}
-                <span style={{ color: tl.color ?? "#CCCCCC" }}>{tl.text}</span>
-              </div>
-            ))}
+            {/* Terminal content */}
+            <div style={{ padding: "10px 14px", fontFamily: "Consolas, monospace", fontSize: Math.min(17, effFontSize * 0.6) }}>
+              {terminalLines.slice(0, termVisibleCount).map((tl, i) => (
+                <div key={i} style={{ height: 30, display: "flex", alignItems: "center", lineHeight: 1.2 }}>
+                  {tl.prompt && (
+                    <span style={{ color: "#6A9955", marginRight: 6 }}>&gt;</span>
+                  )}
+                  <span style={{ color: tl.color ?? "#CCCCCC" }}>{tl.text}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* ─── Status Bar ────────────────────────────── */}
       <div
         style={{
-          height: 30,
+          height: statusH,
           display: "flex",
           alignItems: "center",
           padding: "0 14px",
